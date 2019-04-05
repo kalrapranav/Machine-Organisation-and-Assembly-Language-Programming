@@ -1,0 +1,635 @@
+*----------------------------------------------------------------------
+* Programmer: 
+* Class Account: 
+* Assignment or Title: 
+* Filename: 
+* Date completed:  
+*----------------------------------------------------------------------
+* Problem statement:
+* Input: 
+* Output: 
+* Error conditions tested: 
+* Included files: 
+* Method and/or pseudocode: 
+* References: 
+*----------------------------------------------------------------------
+*
+        ORG     $0
+        DC.L    $3000           * Stack pointer value after a reset
+        DC.L    start           * Program counter value after a reset
+        ORG     $3000           * Start at location 3000 Hex
+*
+*----------------------------------------------------------------------
+*
+*  File: /home/cs/faculty/riggins/bsvc/macros/iomacs.s
+*  I/O initialization and macro definitions for use with 68kpp.  
+*  Macros by Alan Riggins and Sara Baase
+*  Trap14 atof by Huijuan Hyun, Summer 2004.
+*  All other trap14 code written by Alan Riggins, summer 2012
+*  Last modified: August 15,2012 by Alan Riggins
+*
+*  Trap code definitions, etc.
+*
+.INIT13 equ     $0000           *Initialize I/O (SCI)
+.INIT14 equ     $0000
+.INSTR  equ     $0001           *Input a line from keyboard
+.INFLO  equ     $0001
+.INCHR  equ     $0002           *Input a character from keyboard
+.ATOUN	equ     $0002		*convert string to unpack floating number
+.UNTOPA	equ     $0003
+.OUTCHR equ     $0003           *Output a character to screen
+.PATOUN	equ     $0004
+.ADD	equ     $0006		*Add two floating point numbers
+.OUTSTR equ     $0004           *Output a string
+.MUL	equ     $0007		*Multiply two floating point numbers
+.DIV	equ     $0008
+.CVTA2  equ     $0005           *Convert ascii to 2's complement
+.FTOA	equ     $0005
+.CVT2A  equ     $0006           *Convert 2's complement to ascii
+.SQRT   equ     $0009
+.CMP    equ     $000A
+.POW    equ     $000B
+.ITOF   equ     $000C           * convert int to float
+.FTOI   equ     $000D           * convert float to int
+VEC13	equ     (32+13)*4       *Trap 13 vector address
+VEC14	equ     (32+14)*4
+ADDR13  equ     $5000           *Trap 13 handler address
+ADDR14	equ     $5200
+LINEFEED equ	10	        *LineFeed Character value
+CARR_RETURN equ 13	        *CarriageReturn Character value
+*
+
+
+    
+        
+
+
+* Two args, first the destination, second the number of digits to print
+* The source must be in D0 as a longword
+    
+
+
+
+
+
+
+
+
+* Sets the CCR
+
+    
+    
+    
+            
+** trap13 macros follow
+
+    
+    
+    
+  
+     
+ 
+                  		
+                  		
+
+*===================
+*
+*  File: evtmacs.s
+*  EVT initialization and macro definitions for use with 68kpp.  
+*  Macro by Huijuan Yin
+*  Last modified: December 2003
+*
+
+
+
+*
+*----------------------------------------------------------------------
+*
+* Register use
+*
+*----------------------------------------------------------------------
+*
+start:
+*       start: initIO 
+   move.l  #ADDR13,VEC13
+   trap    #13
+   dc.w    .INIT13
+*       END OF MACRO EXPANSION
+
+*       setEVT  
+	move.l	#$5f00,8
+	move.l	#$5f80,12
+	move.l	#$6100,16
+	move.l 	#$6900,20
+*       END OF MACRO EXPANSION
+
+*       initF  
+	move.l 	#ADDR14,VEC14
+	trap	#14
+	dc.w	.init14
+*       END OF MACRO EXPANSION
+
+
+				* Your code goes HERE
+				
+	move.l #1,D1			*to check right file
+*       dump D1 
+   link    A6,#-80
+   movem.l D0/A1-A2,-(SP)
+   movea.l A6,A1
+   suba.l  #80,A1
+   movea.l A1,A2
+   move.l   D1,D0
+*       cvt2a (A1),#12 
+	move.w  #12,-(sp)
+	pea     (A1)
+	trap    #13
+	dc.w    .CVT2A
+	adda.l  #6,sp
+*       END OF MACRO EXPANSION
+
+*       stripp (A1),#12 
+	movem.l	A1-A4,-(SP)
+	lea      (A1),A1 * A1 points to source byte to move
+   	movea.l  A1,A4 * copy start to get length of new string
+	movea.l	A1,A2 * A2 points to destination byte.
+	movea.l	A1,A3 * A3 indicates end of string
+	adda.l	#12,A3
+	cmpa.l	A1,A3 * if string is 0 length or less
+	BLE	nadaMCR0		  
+	cmpi.b	#'-',(A1)
+	BNE	loopMCR0
+	adda.l	#1,A1 * found a minus sign, skip over it
+	adda.l	#1,A2
+loopMCR0: 
+	cmpa.l	A1,A3 * quit condition
+	BEQ	doneMCR0
+	cmpi.b	#'0',(A1)
+	BNE	nextMCR0	* move A1 down until we hit a nonzero digit
+	adda.l	#1,A1			
+	BRA	loopMCR0	
+nextMCR0: 
+	cmpa.l	A1,A3 * quit condition
+	BEQ	doneMCR0
+	move.b	(A1)+,(A2)+   * move digits following leading zeros
+	BRA	nextMCR0			
+doneMCR0: 
+   	suba.l  A4,A2
+   	move.l  A2,D0
+	tst.l	D0	*if the number was all zeros, return one zero.
+	BGT	outMCR0
+	move.b	#$30,(A4)
+	move.l	#1,D0
+	BRA	outMCR0
+nadaMCR0: move.l	#0,D0	
+outMCR0:  movem.l	(SP)+,A1-A4
+*       END OF MACRO EXPANSION
+
+   adda.l  D0,A1
+   clr.b   (A1)
+*       lineout (A2) 
+	pea	(A2)
+	trap	#13
+	dc.w	.OUTSTR
+	adda.l	#4,sp
+*       END OF MACRO EXPANSION
+
+   movem.l (SP)+,D0/A1-A2
+   unlk    A6
+*       END OF MACRO EXPANSION
+
+	clr.l	D1
+	
+		*INPUT
+	
+*       lineout line1 
+	pea	line1
+	trap	#13
+	dc.w	.OUTSTR
+	adda.l	#4,sp
+*       END OF MACRO EXPANSION
+
+*       floatin inv 
+	pea	    inv
+	trap	#14
+	dc.w	.INFLO
+	adda.l	#4,sp
+	tst.l	d0
+*       END OF MACRO EXPANSION
+
+*       cvtaf inv,D1 
+	pea	    inv
+	trap	#14
+	dc.w	.ATOUN
+	adda.l	#4,sp
+    move.l  D0,D1
+*       END OF MACRO EXPANSION
+
+	move.l	D1,inv
+	clr.l	D0
+	clr.l	D1
+	
+*       lineout line2 
+	pea	line2
+	trap	#13
+	dc.w	.OUTSTR
+	adda.l	#4,sp
+*       END OF MACRO EXPANSION
+
+*       floatin mond 
+	pea	    mond
+	trap	#14
+	dc.w	.INFLO
+	adda.l	#4,sp
+	tst.l	d0
+*       END OF MACRO EXPANSION
+
+*       cvtaf mond,D1 
+	pea	    mond
+	trap	#14
+	dc.w	.ATOUN
+	adda.l	#4,sp
+    move.l  D0,D1
+*       END OF MACRO EXPANSION
+
+	move.l	D1,mond
+	clr.l	D0
+	clr.l	D1
+	
+*       lineout line3 
+	pea	line3
+	trap	#13
+	dc.w	.OUTSTR
+	adda.l	#4,sp
+*       END OF MACRO EXPANSION
+
+*       floatin rate 
+	pea	    rate
+	trap	#14
+	dc.w	.INFLO
+	adda.l	#4,sp
+	tst.l	d0
+*       END OF MACRO EXPANSION
+
+*       cvtaf rate,D1 
+	pea	    rate
+	trap	#14
+	dc.w	.ATOUN
+	adda.l	#4,sp
+    move.l  D0,D1
+*       END OF MACRO EXPANSION
+
+	move.l	D1,rate
+	clr.l	D0
+	clr.l	D1
+	
+*       lineout line4 
+	pea	line4
+	trap	#13
+	dc.w	.OUTSTR
+	adda.l	#4,sp
+*       END OF MACRO EXPANSION
+
+*       floatin years 
+	pea	    years
+	trap	#14
+	dc.w	.INFLO
+	adda.l	#4,sp
+	tst.l	d0
+*       END OF MACRO EXPANSION
+
+*       cvtaf years,D1 
+	pea	    years
+	trap	#14
+	dc.w	.ATOUN
+	adda.l	#4,sp
+    move.l  D0,D1
+*       END OF MACRO EXPANSION
+
+	move.l	D1,years
+	clr.l	D0
+	clr.l	D1
+	
+		*Finding output 1 
+	
+		*Computing (n*t)
+		
+	move.l	years,D1
+	
+*       itof #12,D2 
+    move.l  #12,-(SP)
+    trap    #14
+    dc.w    .ITOF
+    adda.l  #4,SP
+    move.l  D0,D2
+*       END OF MACRO EXPANSION
+
+	
+	fmuls	D2,D1
+	move.l	D1,fpow		* (n*t) in pow
+*       dump D1 
+   link    A6,#-80
+   movem.l D0/A1-A2,-(SP)
+   movea.l A6,A1
+   suba.l  #80,A1
+   movea.l A1,A2
+   move.l   D1,D0
+*       cvt2a (A1),#12 
+	move.w  #12,-(sp)
+	pea     (A1)
+	trap    #13
+	dc.w    .CVT2A
+	adda.l  #6,sp
+*       END OF MACRO EXPANSION
+
+*       stripp (A1),#12 
+	movem.l	A1-A4,-(SP)
+	lea      (A1),A1 * A1 points to source byte to move
+   	movea.l  A1,A4 * copy start to get length of new string
+	movea.l	A1,A2 * A2 points to destination byte.
+	movea.l	A1,A3 * A3 indicates end of string
+	adda.l	#12,A3
+	cmpa.l	A1,A3 * if string is 0 length or less
+	BLE	nadaMCR1		  
+	cmpi.b	#'-',(A1)
+	BNE	loopMCR1
+	adda.l	#1,A1 * found a minus sign, skip over it
+	adda.l	#1,A2
+loopMCR1: 
+	cmpa.l	A1,A3 * quit condition
+	BEQ	doneMCR1
+	cmpi.b	#'0',(A1)
+	BNE	nextMCR1	* move A1 down until we hit a nonzero digit
+	adda.l	#1,A1			
+	BRA	loopMCR1	
+nextMCR1: 
+	cmpa.l	A1,A3 * quit condition
+	BEQ	doneMCR1
+	move.b	(A1)+,(A2)+   * move digits following leading zeros
+	BRA	nextMCR1			
+doneMCR1: 
+   	suba.l  A4,A2
+   	move.l  A2,D0
+	tst.l	D0	*if the number was all zeros, return one zero.
+	BGT	outMCR1
+	move.b	#$30,(A4)
+	move.l	#1,D0
+	BRA	outMCR1
+nadaMCR1: move.l	#0,D0	
+outMCR1:  movem.l	(SP)+,A1-A4
+*       END OF MACRO EXPANSION
+
+   adda.l  D0,A1
+   clr.b   (A1)
+*       lineout (A2) 
+	pea	(A2)
+	trap	#13
+	dc.w	.OUTSTR
+	adda.l	#4,sp
+*       END OF MACRO EXPANSION
+
+   movem.l (SP)+,D0/A1-A2
+   unlk    A6
+*       END OF MACRO EXPANSION
+
+	clr.l	D1
+	
+		*computing (1+r/n)
+		
+	move.l	rate,D1
+	fdivu	#12,D1		*sub1 = (rate/n + 1), quo in lower word
+	swap	D1
+	clr.w	D1
+	swap	D1
+	move.l	D1,rDn		*rDn = r/n
+*       fadd.l #1,D1 
+    move.l  D1,-(SP)
+    move.l  #1,-(SP)
+    trap    #14
+    dc.w    .ADD
+    adda.l  #8,SP
+    move.l  D0,D1
+*       END OF MACRO EXPANSION
+
+	move.l	D1,sub1
+	*dump	D1		*Check
+
+	
+		*computing (output 1)
+	
+	move.l	#1,out1
+	move.l	#1,D2		*D2 counter
+	
+	lea	pow,A1
+	
+	
+top1:	cmp.l	D1,A1
+	BEQ	end1
+	move.l	sub1,D1
+	fmuls	D1,D1
+	move.l	D1,sub1
+	faddi.l	#1,D2
+	bra	top1
+	
+end1:	move.l	sub1,D1
+	move.l	D1,sub2		*sub2 = sub1 = (rate/n + 1)^(nt)
+	move.l	inv,D2
+	fmuls	D1,D2
+	move.l	D2,out1	
+	
+	clr.l	D0
+	clr.l	D1
+	clr.l	D2
+	
+		*computing (r/n)*(1+r/n) stored in sub3
+		
+	move.l	rDn,D1
+	move.l	D1,D2
+	
+*       itof #1,D4 
+    move.l  #1,-(SP)
+    trap    #14
+    dc.w    .ITOF
+    adda.l  #4,SP
+    move.l  D0,D4
+*       END OF MACRO EXPANSION
+
+	
+*       fadd.l D4,D2 
+    move.l  D2,-(SP)
+    move.l  D4,-(SP)
+    trap    #14
+    dc.w    .ADD
+    adda.l  #8,SP
+    move.l  D0,D2
+*       END OF MACRO EXPANSION
+
+	fmuls	D2,D1
+	move.l	D1,sub3		*D1 has the denominator 
+	clr.l	D4
+	
+		*computing numerator
+		
+	move.l	sub2,D2
+	
+*       itof #1,D4 
+    move.l  #1,-(SP)
+    trap    #14
+    dc.w    .ITOF
+    adda.l  #4,SP
+    move.l  D0,D4
+*       END OF MACRO EXPANSION
+
+	
+*       fsub.l D4,D2 
+    move.l  D2,-(SP)    * dest
+    move.l  D4,D0
+    bchg.l  #31,D0    
+    move.l  D0,-(SP)
+    trap    #14
+    dc.w    .ADD
+    adda.l  #8,SP
+    move.l  D0,D2
+*       END OF MACRO EXPANSION
+
+	
+	clr.l	D4
+	
+		*computing output 2 
+	
+	divs	D1,D2
+	swap	D2
+	clr.l	D2
+	swap	D2
+	
+	move.l	mond,D3
+	fmuls	D2,D3
+	move.l	D3,out2
+	
+	move.l	out1,D1
+	move.l	out2,D2
+*       fadd.l D1,D2 
+    move.l  D2,-(SP)
+    move.l  D1,-(SP)
+    trap    #14
+    dc.w    .ADD
+    adda.l  #8,SP
+    move.l  D0,D2
+*       END OF MACRO EXPANSION
+
+	move.l	D2,final
+	
+	move.l	D2,D0
+*       cvtfa final,#2 
+    move.w  #2,-(SP)
+    pea     final    
+    trap    #14
+    dc.w    .FTOA
+    adda.l  #6,SP
+*       END OF MACRO EXPANSION
+
+	move.l	final,D1
+*       dump D1 
+   link    A6,#-80
+   movem.l D0/A1-A2,-(SP)
+   movea.l A6,A1
+   suba.l  #80,A1
+   movea.l A1,A2
+   move.l   D1,D0
+*       cvt2a (A1),#12 
+	move.w  #12,-(sp)
+	pea     (A1)
+	trap    #13
+	dc.w    .CVT2A
+	adda.l  #6,sp
+*       END OF MACRO EXPANSION
+
+*       stripp (A1),#12 
+	movem.l	A1-A4,-(SP)
+	lea      (A1),A1 * A1 points to source byte to move
+   	movea.l  A1,A4 * copy start to get length of new string
+	movea.l	A1,A2 * A2 points to destination byte.
+	movea.l	A1,A3 * A3 indicates end of string
+	adda.l	#12,A3
+	cmpa.l	A1,A3 * if string is 0 length or less
+	BLE	nadaMCR2		  
+	cmpi.b	#'-',(A1)
+	BNE	loopMCR2
+	adda.l	#1,A1 * found a minus sign, skip over it
+	adda.l	#1,A2
+loopMCR2: 
+	cmpa.l	A1,A3 * quit condition
+	BEQ	doneMCR2
+	cmpi.b	#'0',(A1)
+	BNE	nextMCR2	* move A1 down until we hit a nonzero digit
+	adda.l	#1,A1			
+	BRA	loopMCR2	
+nextMCR2: 
+	cmpa.l	A1,A3 * quit condition
+	BEQ	doneMCR2
+	move.b	(A1)+,(A2)+   * move digits following leading zeros
+	BRA	nextMCR2			
+doneMCR2: 
+   	suba.l  A4,A2
+   	move.l  A2,D0
+	tst.l	D0	*if the number was all zeros, return one zero.
+	BGT	outMCR2
+	move.b	#$30,(A4)
+	move.l	#1,D0
+	BRA	outMCR2
+nadaMCR2: move.l	#0,D0	
+outMCR2:  movem.l	(SP)+,A1-A4
+*       END OF MACRO EXPANSION
+
+   adda.l  D0,A1
+   clr.b   (A1)
+*       lineout (A2) 
+	pea	(A2)
+	trap	#13
+	dc.w	.OUTSTR
+	adda.l	#4,sp
+*       END OF MACRO EXPANSION
+
+   movem.l (SP)+,D0/A1-A2
+   unlk    A6
+*       END OF MACRO EXPANSION
+
+	*lineout final
+	
+		
+
+
+        break                   * Terminate execution
+*
+*----------------------------------------------------------------------
+*       Storage declarations
+
+				* Your storage declarations go 
+				* HERE
+				
+line1:	dc.b	'Please enter the initial investment',0
+line2:	dc.b	'Please enter the monthly investment',0
+line3:	dc.b	'Please enter the annual interest rate in decimal',0
+line4:	dc.b	'Please enter the number of years',0
+
+cper:	dc.l	12				
+				
+inv:	ds.l	10
+mond:	ds.l	10
+rate:	ds.l	10
+years:	ds.l	10
+
+
+pow:	ds.l	10
+rDn:	ds.l	10
+sub1:	ds.l	10
+sub2:	ds.l	10
+sub3:	ds.l	10
+out1:	ds.l	10
+out2:	ds.l	10
+final:	ds.l	10
+	
+check1:	ds.l	10
+					
+					
+        end

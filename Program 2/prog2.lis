@@ -1,0 +1,646 @@
+00000000                                     1  *----------------------------------------------------------------------
+00000000                                     2  * Programmer: 
+00000000                                     3  * Class Account: 
+00000000                                     4  * Assignment or Title: 
+00000000                                     5  * Filename: 
+00000000                                     6  * Date completed:  
+00000000                                     7  *----------------------------------------------------------------------
+00000000                                     8  * Problem statement:
+00000000                                     9  * Input: 
+00000000                                    10  * Output: 
+00000000                                    11  * Error conditions tested: 
+00000000                                    12  * Included files: 
+00000000                                    13  * Method and/or pseudocode: 
+00000000                                    14  * References: 
+00000000                                    15  *----------------------------------------------------------------------
+00000000                                    16  *
+00000000                                    17          ORG     $0
+00000000  00003000                          18          DC.L    $3000           * Stack pointer value after a reset
+00000004  00003000                          19          DC.L    start           * Program counter value after a reset
+00003000                                    20          ORG     $3000           * Start at location 3000 Hex
+00003000                                    21  *
+00003000                                    22  *----------------------------------------------------------------------
+00003000                                    23  *
+00003000                                    24  *  File: /home/cs/faculty/riggins/bsvc/macros/iomacs.s
+00003000                                    25  *  I/O initialization and macro definitions for use with 68kpp.  
+00003000                                    26  *  Macros by Alan Riggins and Sara Baase
+00003000                                    27  *  Trap14 atof by Huijuan Hyun, Summer 2004.
+00003000                                    28  *  All other trap14 code written by Alan Riggins, summer 2012
+00003000                                    29  *  Last modified: August 15,2012 by Alan Riggins
+00003000                                    30  *
+00003000                                    31  *  Trap code definitions, etc.
+00003000                                    32  *
+00003000  =00000000                         33  .INIT13 equ     $0000           *Initialize I/O (SCI)
+00003000  =00000000                         34  .INIT14 equ     $0000
+00003000  =00000001                         35  .INSTR  equ     $0001           *Input a line from keyboard
+00003000  =00000001                         36  .INFLO  equ     $0001
+00003000  =00000002                         37  .INCHR  equ     $0002           *Input a character from keyboard
+00003000  =00000002                         38  .ATOUN	equ     $0002		*convert string to unpack floating number
+00003000  =00000003                         39  .UNTOPA	equ     $0003
+00003000  =00000003                         40  .OUTCHR equ     $0003           *Output a character to screen
+00003000  =00000004                         41  .PATOUN	equ     $0004
+00003000  =00000006                         42  .ADD	equ     $0006		*Add two floating point numbers
+00003000  =00000004                         43  .OUTSTR equ     $0004           *Output a string
+00003000  =00000007                         44  .MUL	equ     $0007		*Multiply two floating point numbers
+00003000  =00000008                         45  .DIV	equ     $0008
+00003000  =00000005                         46  .CVTA2  equ     $0005           *Convert ascii to 2's complement
+00003000  =00000005                         47  .FTOA	equ     $0005
+00003000  =00000006                         48  .CVT2A  equ     $0006           *Convert 2's complement to ascii
+00003000  =00000009                         49  .SQRT   equ     $0009
+00003000  =0000000A                         50  .CMP    equ     $000A
+00003000  =0000000B                         51  .POW    equ     $000B
+00003000  =0000000C                         52  .ITOF   equ     $000C           * convert int to float
+00003000  =0000000D                         53  .FTOI   equ     $000D           * convert float to int
+00003000  =000000B4                         54  VEC13	equ     (32+13)*4       *Trap 13 vector address
+00003000  =000000B8                         55  VEC14	equ     (32+14)*4
+00003000  =00005000                         56  ADDR13  equ     $5000           *Trap 13 handler address
+00003000  =00005200                         57  ADDR14	equ     $5200
+00003000  =0000000A                         58  LINEFEED equ	10	        *LineFeed Character value
+00003000  =0000000D                         59  CARR_RETURN equ 13	        *CarriageReturn Character value
+00003000                                    60  *
+00003000                                    61  
+00003000                                    62  
+00003000                                    63      
+00003000                                    64          
+00003000                                    65  
+00003000                                    66  
+00003000                                    67  * Two args, first the destination, second the number of digits to print
+00003000                                    68  * The source must be in D0 as a longword
+00003000                                    69      
+00003000                                    70  
+00003000                                    71  
+00003000                                    72  
+00003000                                    73  
+00003000                                    74  
+00003000                                    75  
+00003000                                    76  
+00003000                                    77  
+00003000                                    78  * Sets the CCR
+00003000                                    79  
+00003000                                    80      
+00003000                                    81      
+00003000                                    82      
+00003000                                    83              
+00003000                                    84  ** trap13 macros follow
+00003000                                    85  
+00003000                                    86      
+00003000                                    87      
+00003000                                    88      
+00003000                                    89    
+00003000                                    90       
+00003000                                    91   
+00003000                                    92                    		
+00003000                                    93                    		
+00003000                                    94  
+00003000                                    95  *===================
+00003000                                    96  *
+00003000                                    97  *  File: evtmacs.s
+00003000                                    98  *  EVT initialization and macro definitions for use with 68kpp.  
+00003000                                    99  *  Macro by Huijuan Yin
+00003000                                   100  *  Last modified: December 2003
+00003000                                   101  *
+00003000                                   102  
+00003000                                   103  
+00003000                                   104  
+00003000                                   105  *
+00003000                                   106  *----------------------------------------------------------------------
+00003000                                   107  *
+00003000                                   108  * Register use
+00003000                                   109  *
+00003000                                   110  *----------------------------------------------------------------------
+00003000                                   111  *
+00003000                                   112  start:
+00003000                                   113  *       start: initIO 
+00003000  21FC 00005000 00B4               114     move.l  #ADDR13,VEC13
+00003008  4E4D                             115     trap    #13
+0000300A  0000                             116     dc.w    .INIT13
+0000300C                                   117  *       END OF MACRO EXPANSION
+0000300C                                   118  
+0000300C                                   119  *       setEVT  
+0000300C  21FC 00005F00 0008               120  	move.l	#$5f00,8
+00003014  21FC 00005F80 000C               121  	move.l	#$5f80,12
+0000301C  21FC 00006100 0010               122  	move.l	#$6100,16
+00003024  21FC 00006900 0014               123  	move.l 	#$6900,20
+0000302C                                   124  *       END OF MACRO EXPANSION
+0000302C                                   125  
+0000302C                                   126  *       initF  
+0000302C  21FC 00005200 00B8               127  	move.l 	#ADDR14,VEC14
+00003034  4E4E                             128  	trap	#14
+00003036  0000                             129  	dc.w	.init14
+00003038                                   130  *       END OF MACRO EXPANSION
+00003038                                   131  
+00003038                                   132  
+00003038                                   133  				* Your code goes HERE
+00003038                                   134  				
+00003038  7201                             135  	move.l #1,D1			*to check right file
+0000303A                                   136  *       dump D1 
+0000303A  4E56 FFB0                        137     link    A6,#-80
+0000303E  48E7 8060                        138     movem.l D0/A1-A2,-(SP)
+00003042  224E                             139     movea.l A6,A1
+00003044  93FC 00000050                    140     suba.l  #80,A1
+0000304A  2449                             141     movea.l A1,A2
+0000304C  2001                             142     move.l   D1,D0
+0000304E                                   143  *       cvt2a (A1),#12 
+0000304E  3F3C 000C                        144  	move.w  #12,-(sp)
+00003052  4851                             145  	pea     (A1)
+00003054  4E4D                             146  	trap    #13
+00003056  0006                             147  	dc.w    .CVT2A
+00003058  DFFC 00000006                    148  	adda.l  #6,sp
+0000305E                                   149  *       END OF MACRO EXPANSION
+0000305E                                   150  
+0000305E                                   151  *       stripp (A1),#12 
+0000305E  48E7 0078                        152  	movem.l	A1-A4,-(SP)
+00003062  43D1                             153  	lea      (A1),A1 * A1 points to source byte to move
+00003064  2849                             154     	movea.l  A1,A4 * copy start to get length of new string
+00003066  2449                             155  	movea.l	A1,A2 * A2 points to destination byte.
+00003068  2649                             156  	movea.l	A1,A3 * A3 indicates end of string
+0000306A  D7FC 0000000C                    157  	adda.l	#12,A3
+00003070  B7C9                             158  	cmpa.l	A1,A3 * if string is 0 length or less
+00003072  6F00 004A                        159  	BLE	nadaMCR0		  
+00003076  0C11 002D                        160  	cmpi.b	#'-',(A1)
+0000307A  6600 000E                        161  	BNE	loopMCR0
+0000307E  D3FC 00000001                    162  	adda.l	#1,A1 * found a minus sign, skip over it
+00003084  D5FC 00000001                    163  	adda.l	#1,A2
+0000308A                                   164  loopMCR0: 
+0000308A  B7C9                             165  	cmpa.l	A1,A3 * quit condition
+0000308C  6700 001C                        166  	BEQ	doneMCR0
+00003090  0C11 0030                        167  	cmpi.b	#'0',(A1)
+00003094  6600 000A                        168  	BNE	nextMCR0	* move A1 down until we hit a nonzero digit
+00003098  D3FC 00000001                    169  	adda.l	#1,A1			
+0000309E  60EA                             170  	BRA	loopMCR0	
+000030A0                                   171  nextMCR0: 
+000030A0  B7C9                             172  	cmpa.l	A1,A3 * quit condition
+000030A2  6700 0006                        173  	BEQ	doneMCR0
+000030A6  14D9                             174  	move.b	(A1)+,(A2)+   * move digits following leading zeros
+000030A8  60F6                             175  	BRA	nextMCR0			
+000030AA                                   176  doneMCR0: 
+000030AA  95CC                             177     	suba.l  A4,A2
+000030AC  200A                             178     	move.l  A2,D0
+000030AE  4A80                             179  	tst.l	D0	*if the number was all zeros, return one zero.
+000030B0  6E00 000E                        180  	BGT	outMCR0
+000030B4  18BC 0030                        181  	move.b	#$30,(A4)
+000030B8  7001                             182  	move.l	#1,D0
+000030BA  6000 0004                        183  	BRA	outMCR0
+000030BE  7000                             184  nadaMCR0: move.l	#0,D0	
+000030C0  4CDF 1E00                        185  outMCR0:  movem.l	(SP)+,A1-A4
+000030C4                                   186  *       END OF MACRO EXPANSION
+000030C4                                   187  
+000030C4  D3C0                             188     adda.l  D0,A1
+000030C6  4211                             189     clr.b   (A1)
+000030C8                                   190  *       lineout (A2) 
+000030C8  4852                             191  	pea	(A2)
+000030CA  4E4D                             192  	trap	#13
+000030CC  0004                             193  	dc.w	.OUTSTR
+000030CE  DFFC 00000004                    194  	adda.l	#4,sp
+000030D4                                   195  *       END OF MACRO EXPANSION
+000030D4                                   196  
+000030D4  4CDF 0601                        197     movem.l (SP)+,D0/A1-A2
+000030D8  4E5E                             198     unlk    A6
+000030DA                                   199  *       END OF MACRO EXPANSION
+000030DA                                   200  
+000030DA  4281                             201  	clr.l	D1
+000030DC                                   202  	
+000030DC                                   203  		*INPUT
+000030DC                                   204  	
+000030DC                                   205  *       lineout line1 
+000030DC  4879 0000345A                    206  	pea	line1
+000030E2  4E4D                             207  	trap	#13
+000030E4  0004                             208  	dc.w	.OUTSTR
+000030E6  DFFC 00000004                    209  	adda.l	#4,sp
+000030EC                                   210  *       END OF MACRO EXPANSION
+000030EC                                   211  
+000030EC                                   212  *       floatin inv 
+000030EC  4879 000034F8                    213  	pea	    inv
+000030F2  4E4E                             214  	trap	#14
+000030F4  0001                             215  	dc.w	.INFLO
+000030F6  DFFC 00000004                    216  	adda.l	#4,sp
+000030FC  4A80                             217  	tst.l	d0
+000030FE                                   218  *       END OF MACRO EXPANSION
+000030FE                                   219  
+000030FE                                   220  *       cvtaf inv,D1 
+000030FE  4879 000034F8                    221  	pea	    inv
+00003104  4E4E                             222  	trap	#14
+00003106  0002                             223  	dc.w	.ATOUN
+00003108  DFFC 00000004                    224  	adda.l	#4,sp
+0000310E  2200                             225      move.l  D0,D1
+00003110                                   226  *       END OF MACRO EXPANSION
+00003110                                   227  
+00003110  23C1 000034F8                    228  	move.l	D1,inv
+00003116  4280                             229  	clr.l	D0
+00003118  4281                             230  	clr.l	D1
+0000311A                                   231  	
+0000311A                                   232  *       lineout line2 
+0000311A  4879 0000347E                    233  	pea	line2
+00003120  4E4D                             234  	trap	#13
+00003122  0004                             235  	dc.w	.OUTSTR
+00003124  DFFC 00000004                    236  	adda.l	#4,sp
+0000312A                                   237  *       END OF MACRO EXPANSION
+0000312A                                   238  
+0000312A                                   239  *       floatin mond 
+0000312A  4879 00003520                    240  	pea	    mond
+00003130  4E4E                             241  	trap	#14
+00003132  0001                             242  	dc.w	.INFLO
+00003134  DFFC 00000004                    243  	adda.l	#4,sp
+0000313A  4A80                             244  	tst.l	d0
+0000313C                                   245  *       END OF MACRO EXPANSION
+0000313C                                   246  
+0000313C                                   247  *       cvtaf mond,D1 
+0000313C  4879 00003520                    248  	pea	    mond
+00003142  4E4E                             249  	trap	#14
+00003144  0002                             250  	dc.w	.ATOUN
+00003146  DFFC 00000004                    251  	adda.l	#4,sp
+0000314C  2200                             252      move.l  D0,D1
+0000314E                                   253  *       END OF MACRO EXPANSION
+0000314E                                   254  
+0000314E  23C1 00003520                    255  	move.l	D1,mond
+00003154  4280                             256  	clr.l	D0
+00003156  4281                             257  	clr.l	D1
+00003158                                   258  	
+00003158                                   259  *       lineout line3 
+00003158  4879 000034A2                    260  	pea	line3
+0000315E  4E4D                             261  	trap	#13
+00003160  0004                             262  	dc.w	.OUTSTR
+00003162  DFFC 00000004                    263  	adda.l	#4,sp
+00003168                                   264  *       END OF MACRO EXPANSION
+00003168                                   265  
+00003168                                   266  *       floatin rate 
+00003168  4879 00003548                    267  	pea	    rate
+0000316E  4E4E                             268  	trap	#14
+00003170  0001                             269  	dc.w	.INFLO
+00003172  DFFC 00000004                    270  	adda.l	#4,sp
+00003178  4A80                             271  	tst.l	d0
+0000317A                                   272  *       END OF MACRO EXPANSION
+0000317A                                   273  
+0000317A                                   274  *       cvtaf rate,D1 
+0000317A  4879 00003548                    275  	pea	    rate
+00003180  4E4E                             276  	trap	#14
+00003182  0002                             277  	dc.w	.ATOUN
+00003184  DFFC 00000004                    278  	adda.l	#4,sp
+0000318A  2200                             279      move.l  D0,D1
+0000318C                                   280  *       END OF MACRO EXPANSION
+0000318C                                   281  
+0000318C  23C1 00003548                    282  	move.l	D1,rate
+00003192  4280                             283  	clr.l	D0
+00003194  4281                             284  	clr.l	D1
+00003196                                   285  	
+00003196                                   286  *       lineout line4 
+00003196  4879 000034D3                    287  	pea	line4
+0000319C  4E4D                             288  	trap	#13
+0000319E  0004                             289  	dc.w	.OUTSTR
+000031A0  DFFC 00000004                    290  	adda.l	#4,sp
+000031A6                                   291  *       END OF MACRO EXPANSION
+000031A6                                   292  
+000031A6                                   293  *       floatin years 
+000031A6  4879 00003570                    294  	pea	    years
+000031AC  4E4E                             295  	trap	#14
+000031AE  0001                             296  	dc.w	.INFLO
+000031B0  DFFC 00000004                    297  	adda.l	#4,sp
+000031B6  4A80                             298  	tst.l	d0
+000031B8                                   299  *       END OF MACRO EXPANSION
+000031B8                                   300  
+000031B8                                   301  *       cvtaf years,D1 
+000031B8  4879 00003570                    302  	pea	    years
+000031BE  4E4E                             303  	trap	#14
+000031C0  0002                             304  	dc.w	.ATOUN
+000031C2  DFFC 00000004                    305  	adda.l	#4,sp
+000031C8  2200                             306      move.l  D0,D1
+000031CA                                   307  *       END OF MACRO EXPANSION
+000031CA                                   308  
+000031CA  23C1 00003570                    309  	move.l	D1,years
+000031D0  4280                             310  	clr.l	D0
+000031D2  4281                             311  	clr.l	D1
+000031D4                                   312  	
+000031D4                                   313  		*Finding output 1 
+000031D4                                   314  	
+000031D4                                   315  		*Computing (n*t)
+000031D4                                   316  		
+000031D4  2239 00003570                    317  	move.l	years,D1
+000031DA                                   318  	
+000031DA                                   319  *       itof #12,D2 
+000031DA  2F3C 0000000C                    320      move.l  #12,-(SP)
+000031E0  4E4E                             321      trap    #14
+000031E2  000C                             322      dc.w    .ITOF
+000031E4  DFFC 00000004                    323      adda.l  #4,SP
+000031EA  2400                             324      move.l  D0,D2
+000031EC                                   325  *       END OF MACRO EXPANSION
+000031EC                                   326  
+000031EC                                   327  	
+000031EC                                   328  	fmuls	D2,D1
+ERROR: Invalid opcode
+000031EC  23C1 00000000                    329  	move.l	D1,fpow		* (n*t) in pow
+ERROR: Undefined symbol
+000031F2                                   330  *       dump D1 
+000031F2  4E56 FFB0                        331     link    A6,#-80
+000031F6  48E7 8060                        332     movem.l D0/A1-A2,-(SP)
+000031FA  224E                             333     movea.l A6,A1
+000031FC  93FC 00000050                    334     suba.l  #80,A1
+00003202  2449                             335     movea.l A1,A2
+00003204  2001                             336     move.l   D1,D0
+00003206                                   337  *       cvt2a (A1),#12 
+00003206  3F3C 000C                        338  	move.w  #12,-(sp)
+0000320A  4851                             339  	pea     (A1)
+0000320C  4E4D                             340  	trap    #13
+0000320E  0006                             341  	dc.w    .CVT2A
+00003210  DFFC 00000006                    342  	adda.l  #6,sp
+00003216                                   343  *       END OF MACRO EXPANSION
+00003216                                   344  
+00003216                                   345  *       stripp (A1),#12 
+00003216  48E7 0078                        346  	movem.l	A1-A4,-(SP)
+0000321A  43D1                             347  	lea      (A1),A1 * A1 points to source byte to move
+0000321C  2849                             348     	movea.l  A1,A4 * copy start to get length of new string
+0000321E  2449                             349  	movea.l	A1,A2 * A2 points to destination byte.
+00003220  2649                             350  	movea.l	A1,A3 * A3 indicates end of string
+00003222  D7FC 0000000C                    351  	adda.l	#12,A3
+00003228  B7C9                             352  	cmpa.l	A1,A3 * if string is 0 length or less
+0000322A  6F00 004A                        353  	BLE	nadaMCR1		  
+0000322E  0C11 002D                        354  	cmpi.b	#'-',(A1)
+00003232  6600 000E                        355  	BNE	loopMCR1
+00003236  D3FC 00000001                    356  	adda.l	#1,A1 * found a minus sign, skip over it
+0000323C  D5FC 00000001                    357  	adda.l	#1,A2
+00003242                                   358  loopMCR1: 
+00003242  B7C9                             359  	cmpa.l	A1,A3 * quit condition
+00003244  6700 001C                        360  	BEQ	doneMCR1
+00003248  0C11 0030                        361  	cmpi.b	#'0',(A1)
+0000324C  6600 000A                        362  	BNE	nextMCR1	* move A1 down until we hit a nonzero digit
+00003250  D3FC 00000001                    363  	adda.l	#1,A1			
+00003256  60EA                             364  	BRA	loopMCR1	
+00003258                                   365  nextMCR1: 
+00003258  B7C9                             366  	cmpa.l	A1,A3 * quit condition
+0000325A  6700 0006                        367  	BEQ	doneMCR1
+0000325E  14D9                             368  	move.b	(A1)+,(A2)+   * move digits following leading zeros
+00003260  60F6                             369  	BRA	nextMCR1			
+00003262                                   370  doneMCR1: 
+00003262  95CC                             371     	suba.l  A4,A2
+00003264  200A                             372     	move.l  A2,D0
+00003266  4A80                             373  	tst.l	D0	*if the number was all zeros, return one zero.
+00003268  6E00 000E                        374  	BGT	outMCR1
+0000326C  18BC 0030                        375  	move.b	#$30,(A4)
+00003270  7001                             376  	move.l	#1,D0
+00003272  6000 0004                        377  	BRA	outMCR1
+00003276  7000                             378  nadaMCR1: move.l	#0,D0	
+00003278  4CDF 1E00                        379  outMCR1:  movem.l	(SP)+,A1-A4
+0000327C                                   380  *       END OF MACRO EXPANSION
+0000327C                                   381  
+0000327C  D3C0                             382     adda.l  D0,A1
+0000327E  4211                             383     clr.b   (A1)
+00003280                                   384  *       lineout (A2) 
+00003280  4852                             385  	pea	(A2)
+00003282  4E4D                             386  	trap	#13
+00003284  0004                             387  	dc.w	.OUTSTR
+00003286  DFFC 00000004                    388  	adda.l	#4,sp
+0000328C                                   389  *       END OF MACRO EXPANSION
+0000328C                                   390  
+0000328C  4CDF 0601                        391     movem.l (SP)+,D0/A1-A2
+00003290  4E5E                             392     unlk    A6
+00003292                                   393  *       END OF MACRO EXPANSION
+00003292                                   394  
+00003292  4281                             395  	clr.l	D1
+00003294                                   396  	
+00003294                                   397  		*computing (1+r/n)
+00003294                                   398  		
+00003294  2239 00003548                    399  	move.l	rate,D1
+0000329A                                   400  	fdivu	#12,D1		*sub1 = (rate/n + 1), quo in lower word
+ERROR: Invalid opcode
+0000329A  4841                             401  	swap	D1
+0000329C  4241                             402  	clr.w	D1
+0000329E  4841                             403  	swap	D1
+000032A0  23C1 000035C0                    404  	move.l	D1,rDn		*rDn = r/n
+000032A6                                   405  *       fadd.l #1,D1 
+000032A6  2F01                             406      move.l  D1,-(SP)
+000032A8  2F3C 00000001                    407      move.l  #1,-(SP)
+000032AE  4E4E                             408      trap    #14
+000032B0  0006                             409      dc.w    .ADD
+000032B2  DFFC 00000008                    410      adda.l  #8,SP
+000032B8  2200                             411      move.l  D0,D1
+000032BA                                   412  *       END OF MACRO EXPANSION
+000032BA                                   413  
+000032BA  23C1 000035E8                    414  	move.l	D1,sub1
+000032C0                                   415  	*dump	D1		*Check
+000032C0                                   416  
+000032C0                                   417  	
+000032C0                                   418  		*computing (output 1)
+000032C0                                   419  	
+000032C0  23FC 00000001 00003660           420  	move.l	#1,out1
+000032CA  7401                             421  	move.l	#1,D2		*D2 counter
+000032CC                                   422  	
+000032CC  43F9 00003598                    423  	lea	pow,A1
+000032D2                                   424  	
+000032D2                                   425  	
+000032D2  B3C1                             426  top1:	cmp.l	D1,A1
+000032D4  6700 0010                        427  	BEQ	end1
+000032D8  2239 000035E8                    428  	move.l	sub1,D1
+000032DE                                   429  	fmuls	D1,D1
+ERROR: Invalid opcode
+000032DE  23C1 000035E8                    430  	move.l	D1,sub1
+000032E4                                   431  	faddi.l	#1,D2
+ERROR: Invalid opcode
+000032E4  60EC                             432  	bra	top1
+000032E6                                   433  	
+000032E6  2239 000035E8                    434  end1:	move.l	sub1,D1
+000032EC  23C1 00003610                    435  	move.l	D1,sub2		*sub2 = sub1 = (rate/n + 1)^(nt)
+000032F2  2439 000034F8                    436  	move.l	inv,D2
+000032F8                                   437  	fmuls	D1,D2
+ERROR: Invalid opcode
+000032F8  23C2 00003660                    438  	move.l	D2,out1	
+000032FE                                   439  	
+000032FE  4280                             440  	clr.l	D0
+00003300  4281                             441  	clr.l	D1
+00003302  4282                             442  	clr.l	D2
+00003304                                   443  	
+00003304                                   444  		*computing (r/n)*(1+r/n) stored in sub3
+00003304                                   445  		
+00003304  2239 000035C0                    446  	move.l	rDn,D1
+0000330A  2401                             447  	move.l	D1,D2
+0000330C                                   448  	
+0000330C                                   449  *       itof #1,D4 
+0000330C  2F3C 00000001                    450      move.l  #1,-(SP)
+00003312  4E4E                             451      trap    #14
+00003314  000C                             452      dc.w    .ITOF
+00003316  DFFC 00000004                    453      adda.l  #4,SP
+0000331C  2800                             454      move.l  D0,D4
+0000331E                                   455  *       END OF MACRO EXPANSION
+0000331E                                   456  
+0000331E                                   457  	
+0000331E                                   458  *       fadd.l D4,D2 
+0000331E  2F02                             459      move.l  D2,-(SP)
+00003320  2F04                             460      move.l  D4,-(SP)
+00003322  4E4E                             461      trap    #14
+00003324  0006                             462      dc.w    .ADD
+00003326  DFFC 00000008                    463      adda.l  #8,SP
+0000332C  2400                             464      move.l  D0,D2
+0000332E                                   465  *       END OF MACRO EXPANSION
+0000332E                                   466  
+0000332E                                   467  	fmuls	D2,D1
+ERROR: Invalid opcode
+0000332E  23C1 00003638                    468  	move.l	D1,sub3		*D1 has the denominator 
+00003334  4284                             469  	clr.l	D4
+00003336                                   470  	
+00003336                                   471  		*computing numerator
+00003336                                   472  		
+00003336  2439 00003610                    473  	move.l	sub2,D2
+0000333C                                   474  	
+0000333C                                   475  *       itof #1,D4 
+0000333C  2F3C 00000001                    476      move.l  #1,-(SP)
+00003342  4E4E                             477      trap    #14
+00003344  000C                             478      dc.w    .ITOF
+00003346  DFFC 00000004                    479      adda.l  #4,SP
+0000334C  2800                             480      move.l  D0,D4
+0000334E                                   481  *       END OF MACRO EXPANSION
+0000334E                                   482  
+0000334E                                   483  	
+0000334E                                   484  *       fsub.l D4,D2 
+0000334E  2F02                             485      move.l  D2,-(SP)    * dest
+00003350  2004                             486      move.l  D4,D0
+00003352  0840 001F                        487      bchg.l  #31,D0    
+00003356  2F00                             488      move.l  D0,-(SP)
+00003358  4E4E                             489      trap    #14
+0000335A  0006                             490      dc.w    .ADD
+0000335C  DFFC 00000008                    491      adda.l  #8,SP
+00003362  2400                             492      move.l  D0,D2
+00003364                                   493  *       END OF MACRO EXPANSION
+00003364                                   494  
+00003364                                   495  	
+00003364  4284                             496  	clr.l	D4
+00003366                                   497  	
+00003366                                   498  		*computing output 2 
+00003366                                   499  	
+00003366  85C1                             500  	divs	D1,D2
+00003368  4842                             501  	swap	D2
+0000336A  4282                             502  	clr.l	D2
+0000336C  4842                             503  	swap	D2
+0000336E                                   504  	
+0000336E  2639 00003520                    505  	move.l	mond,D3
+00003374                                   506  	fmuls	D2,D3
+ERROR: Invalid opcode
+00003374  23C3 00003688                    507  	move.l	D3,out2
+0000337A                                   508  	
+0000337A  2239 00003660                    509  	move.l	out1,D1
+00003380  2439 00003688                    510  	move.l	out2,D2
+00003386                                   511  *       fadd.l D1,D2 
+00003386  2F02                             512      move.l  D2,-(SP)
+00003388  2F01                             513      move.l  D1,-(SP)
+0000338A  4E4E                             514      trap    #14
+0000338C  0006                             515      dc.w    .ADD
+0000338E  DFFC 00000008                    516      adda.l  #8,SP
+00003394  2400                             517      move.l  D0,D2
+00003396                                   518  *       END OF MACRO EXPANSION
+00003396                                   519  
+00003396  23C2 000036B0                    520  	move.l	D2,final
+0000339C                                   521  	
+0000339C  2002                             522  	move.l	D2,D0
+0000339E                                   523  *       cvtfa final,#2 
+0000339E  3F3C 0002                        524      move.w  #2,-(SP)
+000033A2  4879 000036B0                    525      pea     final    
+000033A8  4E4E                             526      trap    #14
+000033AA  0005                             527      dc.w    .FTOA
+000033AC  DFFC 00000006                    528      adda.l  #6,SP
+000033B2                                   529  *       END OF MACRO EXPANSION
+000033B2                                   530  
+000033B2  2239 000036B0                    531  	move.l	final,D1
+000033B8                                   532  *       dump D1 
+000033B8  4E56 FFB0                        533     link    A6,#-80
+000033BC  48E7 8060                        534     movem.l D0/A1-A2,-(SP)
+000033C0  224E                             535     movea.l A6,A1
+000033C2  93FC 00000050                    536     suba.l  #80,A1
+000033C8  2449                             537     movea.l A1,A2
+000033CA  2001                             538     move.l   D1,D0
+000033CC                                   539  *       cvt2a (A1),#12 
+000033CC  3F3C 000C                        540  	move.w  #12,-(sp)
+000033D0  4851                             541  	pea     (A1)
+000033D2  4E4D                             542  	trap    #13
+000033D4  0006                             543  	dc.w    .CVT2A
+000033D6  DFFC 00000006                    544  	adda.l  #6,sp
+000033DC                                   545  *       END OF MACRO EXPANSION
+000033DC                                   546  
+000033DC                                   547  *       stripp (A1),#12 
+000033DC  48E7 0078                        548  	movem.l	A1-A4,-(SP)
+000033E0  43D1                             549  	lea      (A1),A1 * A1 points to source byte to move
+000033E2  2849                             550     	movea.l  A1,A4 * copy start to get length of new string
+000033E4  2449                             551  	movea.l	A1,A2 * A2 points to destination byte.
+000033E6  2649                             552  	movea.l	A1,A3 * A3 indicates end of string
+000033E8  D7FC 0000000C                    553  	adda.l	#12,A3
+000033EE  B7C9                             554  	cmpa.l	A1,A3 * if string is 0 length or less
+000033F0  6F00 004A                        555  	BLE	nadaMCR2		  
+000033F4  0C11 002D                        556  	cmpi.b	#'-',(A1)
+000033F8  6600 000E                        557  	BNE	loopMCR2
+000033FC  D3FC 00000001                    558  	adda.l	#1,A1 * found a minus sign, skip over it
+00003402  D5FC 00000001                    559  	adda.l	#1,A2
+00003408                                   560  loopMCR2: 
+00003408  B7C9                             561  	cmpa.l	A1,A3 * quit condition
+0000340A  6700 001C                        562  	BEQ	doneMCR2
+0000340E  0C11 0030                        563  	cmpi.b	#'0',(A1)
+00003412  6600 000A                        564  	BNE	nextMCR2	* move A1 down until we hit a nonzero digit
+00003416  D3FC 00000001                    565  	adda.l	#1,A1			
+0000341C  60EA                             566  	BRA	loopMCR2	
+0000341E                                   567  nextMCR2: 
+0000341E  B7C9                             568  	cmpa.l	A1,A3 * quit condition
+00003420  6700 0006                        569  	BEQ	doneMCR2
+00003424  14D9                             570  	move.b	(A1)+,(A2)+   * move digits following leading zeros
+00003426  60F6                             571  	BRA	nextMCR2			
+00003428                                   572  doneMCR2: 
+00003428  95CC                             573     	suba.l  A4,A2
+0000342A  200A                             574     	move.l  A2,D0
+0000342C  4A80                             575  	tst.l	D0	*if the number was all zeros, return one zero.
+0000342E  6E00 000E                        576  	BGT	outMCR2
+00003432  18BC 0030                        577  	move.b	#$30,(A4)
+00003436  7001                             578  	move.l	#1,D0
+00003438  6000 0004                        579  	BRA	outMCR2
+0000343C  7000                             580  nadaMCR2: move.l	#0,D0	
+0000343E  4CDF 1E00                        581  outMCR2:  movem.l	(SP)+,A1-A4
+00003442                                   582  *       END OF MACRO EXPANSION
+00003442                                   583  
+00003442  D3C0                             584     adda.l  D0,A1
+00003444  4211                             585     clr.b   (A1)
+00003446                                   586  *       lineout (A2) 
+00003446  4852                             587  	pea	(A2)
+00003448  4E4D                             588  	trap	#13
+0000344A  0004                             589  	dc.w	.OUTSTR
+0000344C  DFFC 00000004                    590  	adda.l	#4,sp
+00003452                                   591  *       END OF MACRO EXPANSION
+00003452                                   592  
+00003452  4CDF 0601                        593     movem.l (SP)+,D0/A1-A2
+00003456  4E5E                             594     unlk    A6
+00003458                                   595  *       END OF MACRO EXPANSION
+00003458                                   596  
+00003458                                   597  	*lineout final
+00003458                                   598  	
+00003458                                   599  		
+00003458                                   600  
+00003458                                   601  
+00003458  4848                             602          break                   * Terminate execution
+0000345A                                   603  *
+0000345A                                   604  *----------------------------------------------------------------------
+0000345A                                   605  *       Storage declarations
+0000345A                                   606  
+0000345A                                   607  				* Your storage declarations go 
+0000345A                                   608  				* HERE
+0000345A                                   609  				
+0000345A  50 6C 65 61 73 65 20 65 6E ...   610  line1:	dc.b	'Please enter the initial investment',0
+0000347E  50 6C 65 61 73 65 20 65 6E ...   611  line2:	dc.b	'Please enter the monthly investment',0
+000034A2  50 6C 65 61 73 65 20 65 6E ...   612  line3:	dc.b	'Please enter the annual interest rate in decimal',0
+000034D3  50 6C 65 61 73 65 20 65 6E ...   613  line4:	dc.b	'Please enter the number of years',0
+000034F4                                   614  
+000034F4  0000000C                         615  cper:	dc.l	12				
+000034F8                                   616  				
+000034F8                                   617  inv:	ds.l	10
+00003520                                   618  mond:	ds.l	10
+00003548                                   619  rate:	ds.l	10
+00003570                                   620  years:	ds.l	10
+00003598                                   621  
+00003598                                   622  
+00003598                                   623  pow:	ds.l	10
+000035C0                                   624  rDn:	ds.l	10
+000035E8                                   625  sub1:	ds.l	10
+00003610                                   626  sub2:	ds.l	10
+00003638                                   627  sub3:	ds.l	10
+00003660                                   628  out1:	ds.l	10
+00003688                                   629  out2:	ds.l	10
+000036B0                                   630  final:	ds.l	10
+000036D8                                   631  	
+000036D8                                   632  check1:	ds.l	10
+00003700                                   633  					
+00003700                                   634  					
+00003700                                   635          end
+
+8 errors detected
+No warnings generated
