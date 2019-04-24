@@ -32,9 +32,14 @@
 *
 start:  initIO                  * Initialize (required for I/O)
 	setEVT			* Error handling routines
-*	initF			* For floating point macros only	
+ 	initF			* For floating point macros only	
 
 				* Your code goes HERE
+	lineout		titleLine	*printing out the title line 
+	lineout		skipln		*empty line
+	lineout		intPrompt	*printing the input prompt
+	linein		intInput	*to store user input in intInput
+	       
 
 
         break                   * Terminate execution
@@ -44,4 +49,13 @@ start:  initIO                  * Initialize (required for I/O)
 
 				* Your storage declarations go 
 				* HERE
+				
+	titleLine:	dc.b	'Program #3, Pranav Kalra, cssc1592',0
+	intPrompt:	dc.b	'Enter an integer to factor (2..65535):',0
+	skipln:		dc.b	0
+	intInput:	ds.b	80
+       
+       
+       
+       
         end
