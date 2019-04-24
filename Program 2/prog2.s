@@ -1,8 +1,8 @@
 *----------------------------------------------------------------------
-* Programmer: 
-* Class Account: 
-* Assignment or Title: 
-* Filename: 
+* Programmer: Pranav Kalra
+* Class Account: cscc1592
+* Assignment or Title: Program 2 
+* Filename: prog2.s
 * Date completed:  
 *----------------------------------------------------------------------
 * Problem statement:
