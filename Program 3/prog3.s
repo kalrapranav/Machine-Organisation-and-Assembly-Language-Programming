@@ -1,6 +1,6 @@
 *----------------------------------------------------------------------
 * Programmer: Pranav Kalra
-* Class Account: cscc
+* Class Account: cscc1592
 * Assignment or Title: 
 * Filename: prog3.s
 * Date completed: April 23
