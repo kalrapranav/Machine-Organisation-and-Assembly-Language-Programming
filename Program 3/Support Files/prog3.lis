@@ -1,0 +1,185 @@
+00000000                                     1  *----------------------------------------------------------------------
+00000000                                     2  * Programmer: Pranav Kalra
+00000000                                     3  * Class Account: cscc
+00000000                                     4  * Assignment or Title: 
+00000000                                     5  * Filename: prog3.s
+00000000                                     6  * Date completed: April 23
+00000000                                     7  *----------------------------------------------------------------------
+00000000                                     8  * Problem statement:
+00000000                                     9  * Input: 
+00000000                                    10  * Output: 
+00000000                                    11  * Error conditions tested: 
+00000000                                    12  * Included files: 
+00000000                                    13  * Method and/or pseudocode: 
+00000000                                    14  * References: 
+00000000                                    15  *----------------------------------------------------------------------
+00000000                                    16  *
+00000000                                    17          ORG     $0
+00000000  00003000                          18          DC.L    $3000           * Stack pointer value after a reset
+00000004  00003000                          19          DC.L    start           * Program counter value after a reset
+00003000                                    20          ORG     $3000           * Start at location 3000 Hex
+00003000                                    21  *
+00003000                                    22  *----------------------------------------------------------------------
+00003000                                    23  *
+00003000                                    24  *  File: /home/cs/faculty/riggins/bsvc/macros/iomacs.s
+00003000                                    25  *  I/O initialization and macro definitions for use with 68kpp.  
+00003000                                    26  *  Macros by Alan Riggins and Sara Baase
+00003000                                    27  *  Trap14 atof by Huijuan Hyun, Summer 2004.
+00003000                                    28  *  All other trap14 code written by Alan Riggins, summer 2012
+00003000                                    29  *  Last modified: August 15,2012 by Alan Riggins
+00003000                                    30  *
+00003000                                    31  *  Trap code definitions, etc.
+00003000                                    32  *
+00003000  =00000000                         33  .INIT13 equ     $0000           *Initialize I/O (SCI)
+00003000  =00000000                         34  .INIT14 equ     $0000
+00003000  =00000001                         35  .INSTR  equ     $0001           *Input a line from keyboard
+00003000  =00000001                         36  .INFLO  equ     $0001
+00003000  =00000002                         37  .INCHR  equ     $0002           *Input a character from keyboard
+00003000  =00000002                         38  .ATOUN	equ     $0002		*convert string to unpack floating number
+00003000  =00000003                         39  .UNTOPA	equ     $0003
+00003000  =00000003                         40  .OUTCHR equ     $0003           *Output a character to screen
+00003000  =00000004                         41  .PATOUN	equ     $0004
+00003000  =00000006                         42  .ADD	equ     $0006		*Add two floating point numbers
+00003000  =00000004                         43  .OUTSTR equ     $0004           *Output a string
+00003000  =00000007                         44  .MUL	equ     $0007		*Multiply two floating point numbers
+00003000  =00000008                         45  .DIV	equ     $0008
+00003000  =00000005                         46  .CVTA2  equ     $0005           *Convert ascii to 2's complement
+00003000  =00000005                         47  .FTOA	equ     $0005
+00003000  =00000006                         48  .CVT2A  equ     $0006           *Convert 2's complement to ascii
+00003000  =00000009                         49  .SQRT   equ     $0009
+00003000  =0000000A                         50  .CMP    equ     $000A
+00003000  =0000000B                         51  .POW    equ     $000B
+00003000  =0000000C                         52  .ITOF   equ     $000C           * convert int to float
+00003000  =0000000D                         53  .FTOI   equ     $000D           * convert float to int
+00003000  =000000B4                         54  VEC13	equ     (32+13)*4       *Trap 13 vector address
+00003000  =000000B8                         55  VEC14	equ     (32+14)*4
+00003000  =00005000                         56  ADDR13  equ     $5000           *Trap 13 handler address
+00003000  =00005200                         57  ADDR14	equ     $5200
+00003000  =0000000A                         58  LINEFEED equ	10	        *LineFeed Character value
+00003000  =0000000D                         59  CARR_RETURN equ 13	        *CarriageReturn Character value
+00003000                                    60  *
+00003000                                    61  
+00003000                                    62  
+00003000                                    63      
+00003000                                    64          
+00003000                                    65  
+00003000                                    66  
+00003000                                    67  * Two args, first the destination, second the number of digits to print
+00003000                                    68  * The source must be in D0 as a longword
+00003000                                    69      
+00003000                                    70  
+00003000                                    71  
+00003000                                    72  
+00003000                                    73  
+00003000                                    74  
+00003000                                    75  
+00003000                                    76  
+00003000                                    77  
+00003000                                    78  * Sets the CCR
+00003000                                    79  
+00003000                                    80      
+00003000                                    81      
+00003000                                    82      
+00003000                                    83              
+00003000                                    84  ** trap13 macros follow
+00003000                                    85  
+00003000                                    86      
+00003000                                    87      
+00003000                                    88      
+00003000                                    89    
+00003000                                    90       
+00003000                                    91   
+00003000                                    92                    		
+00003000                                    93                    		
+00003000                                    94  
+00003000                                    95  *===================
+00003000                                    96  *
+00003000                                    97  *  File: evtmacs.s
+00003000                                    98  *  EVT initialization and macro definitions for use with 68kpp.  
+00003000                                    99  *  Macro by Huijuan Yin
+00003000                                   100  *  Last modified: December 2003
+00003000                                   101  *
+00003000                                   102  
+00003000                                   103  
+00003000                                   104  
+00003000                                   105  *
+00003000                                   106  *----------------------------------------------------------------------
+00003000                                   107  *
+00003000                                   108  * Register use
+00003000                                   109  *
+00003000                                   110  *----------------------------------------------------------------------
+00003000                                   111  *
+00003000                                   112  start:
+00003000                                   113  *       start: initIO 
+00003000  21FC 00005000 00B4               114     move.l  #ADDR13,VEC13
+00003008  4E4D                             115     trap    #13
+0000300A  0000                             116     dc.w    .INIT13
+0000300C                                   117  *       END OF MACRO EXPANSION
+0000300C                                   118  
+0000300C                                   119  *       setEVT  
+0000300C  21FC 00005F00 0008               120  	move.l	#$5f00,8
+00003014  21FC 00005F80 000C               121  	move.l	#$5f80,12
+0000301C  21FC 00006100 0010               122  	move.l	#$6100,16
+00003024  21FC 00006900 0014               123  	move.l 	#$6900,20
+0000302C                                   124  *       END OF MACRO EXPANSION
+0000302C                                   125  
+0000302C                                   126  *       initF  
+0000302C  21FC 00005200 00B8               127  	move.l 	#ADDR14,VEC14
+00003034  4E4E                             128  	trap	#14
+00003036  0000                             129  	dc.w	.init14
+00003038                                   130  *       END OF MACRO EXPANSION
+00003038                                   131  
+00003038                                   132  
+00003038                                   133  				* Your code goes HERE
+00003038                                   134  *       lineout titleLine 
+00003038  4879 0000307C                    135  	pea	titleLine
+0000303E  4E4D                             136  	trap	#13
+00003040  0004                             137  	dc.w	.OUTSTR
+00003042  DFFC 00000004                    138  	adda.l	#4,sp
+00003048                                   139  *       END OF MACRO EXPANSION
+00003048                                   140  
+00003048                                   141  *       lineout skipln 
+00003048  4879 000030C6                    142  	pea	skipln
+0000304E  4E4D                             143  	trap	#13
+00003050  0004                             144  	dc.w	.OUTSTR
+00003052  DFFC 00000004                    145  	adda.l	#4,sp
+00003058                                   146  *       END OF MACRO EXPANSION
+00003058                                   147  
+00003058                                   148  *       lineout intPrompt 
+00003058  4879 0000309F                    149  	pea	intPrompt
+0000305E  4E4D                             150  	trap	#13
+00003060  0004                             151  	dc.w	.OUTSTR
+00003062  DFFC 00000004                    152  	adda.l	#4,sp
+00003068                                   153  *       END OF MACRO EXPANSION
+00003068                                   154  
+00003068                                   155  *       linein intInput 
+00003068  4879 000030C7                    156  	pea	intInput
+0000306E  4E4D                             157  	trap	#13
+00003070  0001                             158  	dc.w	.INSTR
+00003072  DFFC 00000004                    159  	adda.l	#4,sp
+00003078  4A80                             160  	tst.l   d0
+0000307A                                   161  *       END OF MACRO EXPANSION
+0000307A                                   162  
+0000307A                                   163  	       
+0000307A                                   164  
+0000307A                                   165  
+0000307A  4848                             166          break                   * Terminate execution
+0000307C                                   167  *
+0000307C                                   168  *----------------------------------------------------------------------
+0000307C                                   169  *       Storage declarations
+0000307C                                   170  
+0000307C                                   171  				* Your storage declarations go 
+0000307C                                   172  				* HERE
+0000307C                                   173  				
+0000307C  50 72 6F 67 72 61 6D 20 23 ...   174  	titleLine:	dc.b	'Program #3, Pranav Kalra, cssc1592',0
+0000309F  45 6E 74 65 72 20 61 6E 20 ...   175  	intPrompt:	dc.b	'Enter an integer to factor (2..65535):',0
+000030C6  00                               176  	skipln:		dc.b	0
+000030C7                                   177  	intInput:	ds.b	80
+00003117                                   178         
+00003117                                   179         
+00003117                                   180         
+00003117                                   181         
+00003117                                   182          end
+
+No errors detected
+No warnings generated
