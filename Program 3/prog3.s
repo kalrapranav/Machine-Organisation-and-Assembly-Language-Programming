@@ -1,6 +1,6 @@
 *----------------------------------------------------------------------
 * Programmer: Pranav Kalra
-* Class Account: cscc1592
+* Class Account: cscc
 * Assignment or Title: 
 * Filename: prog3.s
 * Date completed: April 23
@@ -37,8 +37,34 @@ start:  initIO                  * Initialize (required for I/O)
 				* Your code goes HERE
 	lineout		titleLine	*printing out the title line 
 	lineout		skipln		*empty line
-	lineout		intPrompt	*printing the input prompt
+
+	
+input:	lineout		intPrompt	*printing the input prompt
 	linein		intInput	*to store user input in intInput
+	stripp		intInput,D0	*
+	move.l		D0,D2		*
+	lea		intInput,D0	*
+	tst.w		D2		*
+	BEQ		invalid		*
+	cmpi.w		#5,D2		*
+	BHI		invalid		*
+	move.w		D2,D4		*
+	subq.w		#1,D4		*
+	
+loop: 	cmpi.b		#$30,(A0)	*
+	BLO		invalid		*
+	cmpi.b		#$39,(A0)+	*
+	BHI		invalid		*
+	*bra		loop		*
+	dbra		D4,loop		*
+	
+	cvta2		buffer,D2	*
+	move.l		D0,D4		*
+	compi.l		#2,D4		*
+	BLO		invalid		*
+	cmpi.l		#65535,D4	*
+	bgt		invalid		*
+	lea		answer,A1	
 	       
 
 
