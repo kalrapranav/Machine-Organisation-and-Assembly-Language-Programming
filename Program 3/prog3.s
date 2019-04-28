@@ -1,5 +1,5 @@
 *----------------------------------------------------------------------
-* Programmer: 
+* Programmer: Pranav Kalra
 * Class Account: 
 * Assignment or Title: 	Program #3
 * Filename: 		prog3.s
