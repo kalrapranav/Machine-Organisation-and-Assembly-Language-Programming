@@ -35,6 +35,9 @@ start:  initIO                  * Initialize (required for I/O)
 *	initF			* For floating point macros only	
 
 				* Your code goes HERE
+				
+	lineout		progTitle		*printing program title
+				
 
 
         break                   * Terminate execution
@@ -44,4 +47,9 @@ start:  initIO                  * Initialize (required for I/O)
 
 				* Your storage declarations go 
 				* HERE
+				
+	progTitle:	dc.b		'Program #3, Pranav Kalra, cssc1592',0
+	
+	
+	
         end
