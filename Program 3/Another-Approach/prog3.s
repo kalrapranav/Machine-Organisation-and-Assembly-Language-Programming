@@ -35,32 +35,35 @@ start:  initIO                  * Initialize (required for I/O)
 *	initF			* For floating point macros only	
 
 				* Your code goes HERE
-
-	lineout		progTitle
-	lineout		skipln	
-	lineout		inputPrompt
-	linein		buffer
-	
-	lea		buffer,A0
-	
-int_test:
-	move.b		(A0)+,D1		* Load a digit from the number
-	cmp.b		#48,D1
-	blt		wrongIn
-	lineout		success
-	
-	
-skip:
-	lineout		progTitle
-	
-wrongIn:
-	lineout		skipln
-	lineout		inputPrompt
-	
-	
-
-
 				
+	lineout		progTitle		*printing program title
+	lineout		skipLn			*skipping one line
+	
+*------This loop is for asking the value form user and storing it for use
+WHILE:
+	lineout		inLine			*printing input line
+	linein		input			*storing userInput in input
+	cvta2		input,#2
+	move.b		input,D0		*moving user input to D0
+
+						*check of the usr input is between 2..65535
+	cmpi.b		#'2',D0
+	blt		wrgInput
+	*cmpi.b		#'65535',D0
+	*bhi		wrgInput
+	lineout		breakP
+
+	move.b		D0,D1
+FOR:
+	lineout		hello
+	addq		#1,D1
+	bra		FOR
+	
+	
+wrgInput:
+	lineout		sorryLine
+	bra		WHILE
+
 
 
         break                   * Terminate execution
@@ -69,13 +72,15 @@ wrongIn:
 *       Storage declarations
 
 				* Your storage declarations go 
-				* HERE
 				
-	progTitle:	dc.b		'Program #3, Pranav Kalra, cssc1592',0
-	inputPrompt:	dc.b		'Enter an integer to factor (2..65535):',0
-	buffer:		ds.b		80
-	skipln:		dc.b		0
-	success
+	progTitle:		dc.b		'Program #3, Pranav Kalra, cssc1592',0
+	skipLn:			dc.b		0
+	inLine:			dc.b		'Enter an integer to factor (2..65535):',0
+	input:			ds.b		80
+	sorryLine:		dc.b		' Sorry, your input is not a valid integer.',0
+	breakP:			dc.b		'Break POint',0
+	hello:			dc.b		'hello',0
+
 	
 	
 	
