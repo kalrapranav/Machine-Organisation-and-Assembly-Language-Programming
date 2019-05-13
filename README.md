@@ -1,6 +1,7 @@
 # CS 237 ~ Machine Organisation and Assembly Language Programming 
 General concepts of machine and assembly language, data representation, looping and addressing
 techniques, arrays, subroutines, macros. Extensive assembly language programming.
+The follwing porgrams were written with Motorolla M68000 CPU and bsvc simulator. 
 
 ## Projects/Assignments
 
