@@ -1,4 +1,4 @@
-# CS-237-Machine-Organisation-and-Assembly-Language-Programming
+# Machine Organisation and Assembly Language Programming ~ CS 237
 General concepts of machine and assembly language, data representation, looping and addressing
 techniques, arrays, subroutines, macros. Extensive assembly language programming.
 
