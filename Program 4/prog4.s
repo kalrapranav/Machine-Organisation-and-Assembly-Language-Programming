@@ -1,21 +1,30 @@
-051075**----------------------------------------------------------------------
-* Programmer: Pranav Kalra
-* Class Account: cssc1377
-* Assignment or Title: Assigment 4
-* Filename: prog3.s
-* Date completed: 05/12/19 
 *----------------------------------------------------------------------
-* Problem statement: enter a item number to give out a price for the item number
-* Input: a number 
-* Output: the price of that number 
-* Error conditions tested: input one single natural number up to five digit 
-* Included files: N/A
-* Method and/or pseudocode: the program will ask a user for a single number up to five digit. The *array of the integer will point the item price on that number and will print that price.
-* References: Marc
-*----------------------------------
-
-*------------------------------------
+* Programmer: Pranav Kalra
+* Class Account: css1592
+* Assignment or Title: Programming Assignment #4
+* Filename: prog4.s
+* Date completed: 05/14/19 
+*----------------------------------------------------------------------
+* Problem statement: Use a subroutine to implement a recursive 
+* 		     algorithm to calculate the product of two
+*		     numbers 		
+* Input: Two Interger  number for multiplication
+* Output: The product if the two numbers 
+* Error conditions tested: None.
+* Included files: product.s
+*		  /home/ma/cs237/bsvc/iomacs.s
+*                 /home/ma/cs237/bsvc/casemacs.c
+* Method and/or pseudocode: 
+*	print product(n)
+* 	long product(int n){
+*		if(n==0) return 0;
+*		if(n==1) return 1;
+*		return product(n-1) + product(n-2);
+*		}
+* References: None.
+*----------------------------------------------------------------------
 *
+product: EQU	$6000
         ORG     $0
         DC.L    $3000           * Stack pointer value after a reset
         DC.L    start           * Program counter value after a reset
@@ -23,73 +32,51 @@
 *
 *----------------------------------------------------------------------
 *
-#minclude /home/cs/faculty/cs237/bsvc/macros/iomacs.s
-#minclude /home/cs/faculty/cs237/bsvc/macros/evtmacs.s
+#minclude /home/cs/faculty/riggins/bsvc/macros/iomacs.s
+#minclude /home/cs/faculty/riggins/bsvc/macros/evtmacs.s
 *
 *----------------------------------------------------------------------
 *
-* 
+* Register use
+*
 *----------------------------------------------------------------------
 *
-start:  
-initIO                  * Initialize (required for I/O)
-setEVT* Error handling routines
-*initF* For floating point macros only
 
-gcd:EQU$7000
+start:  initIO                  * Initialize (required for I/O)
+	setEVT			* Error handling routines
+*	initF			* For floating point macros only	
+	
+	 
+ lineout title		*print out class information
+ lineout prompt1	*print prompt1
+ linein  buffer		*take value from user asd save in buffer
+ cvta2   buffer,D0	*Converts asscii to two;s complement and saves in buffer
+ move.w  D0,-(SP)	*pushes D0 to the satck
+ lineout prompt2	*print prompt2
+ linein  buffer		*take value from user and save in buffer
+ cvta2   buffer,D0	*Converts asscii to two;s complement and saves in buffer    
+ move.w  D0,-(SP)	*pushed D0 to the stack 
+ jsr     product	*puts the program counter at the strating address of product  
+ adda.l  #4,SP    
 
-
-lineout tittle
-lineout prompt
-lineininput
-
-leainput,A0
-        clr.lD3
-nul:
-cmpi.b#' ',(A0)
-beqprint
-adda.l#1,A0
-branul
-
-print:
-move.lA0,D1
-subD2,D1
-sub.lD1,A0
-cvta2(A0),D1
-add.lD1,D0
-move.lD0,D3
-cmpi.b#0,D0
-beqend
-add.l#1,A0
-move.lA0,A1
-move.lA1,D2
-clr.wD3
+ cvt2a   num,#15      
+ stripp  num,#15	*pulls out the remainder
+ lea     num,A0		*loads A0 in num 
+ adda.l  D0,A0
+ clr.b   (A0)
+ lineout answer		*print the answer 
+ 
 
 
-end:
-cvt2aout2,#8
-strippout2,#8
-move.lA0,A2
-adda.lA2,A1
-leaout2,A1
-adda.lD0,A1
-move.b#'.',(A1)+
-clr.b(A1)
-        
-lineoutout1
-
-
-break
-
-
+        break                   * Terminate execution
 *
 *----------------------------------------------------------------------
 *       Storage declarations
-*My Storage declaration goes here
 
-tittle: dc.b    'Program #4, Mehul Sompura, cssc1377',0
-prompt: dc.b    'Enter two numbers separated by a space: ',0
-input:ds.b80
-out1:dc.b'Their GCD is '
-out2:ds.b80
-        end
+title:    dc.b       'Pranav Kalra, Program #4, cssc1592',0
+prompt1:  dc.b       'Enter the first integer',0
+prompt2:  dc.b       'Enter the second integer',0
+buffer:   ds.b        80
+answer:   dc.b       'The product of the numbers are '
+num:       ds.b        15
+end
