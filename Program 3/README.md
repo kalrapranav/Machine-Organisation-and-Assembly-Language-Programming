@@ -1,20 +1,22 @@
 
-CS237 Spring 2019
-Programming Assignment #3
-125 points
-Due Date/Time:
-Your program will be due on Tuesday, April 16th at the beginning of class. For this assignment, the name of your source code file must be prog3.s.  As with previous assignments, you must place a copy of your source code file in your class account handin/ subdirectory for it to be graded.
+CS237 Spring 2019  
+Programming Assignment #3  
+125 points  
+Due Date/Time:  
+Your program will be due on Tuesday, April 16th at the beginning of class. For this assignment, the name of your source code file must be prog3.s.  As with previous assignments, you must place a copy of your source code file in your class account handin/ subdirectory for it to be graded.  
 
-The Assignment:
+The Assignment:  
 This assignment is designed to help you learn about flow control, branching, and looping in assembler.   You will write a program that prints the prime factors for any unsigned integer of size word.  
-Details:
-
-    Your program must print a title line, consisting of The assignment number, your name, and your class account, all on one line:
-    Your program will accept as input only unsigned integers in the range 2 .. 65535.  If the user enters a value that is invalid, your program must print a helpful error message and prompt the user to enter a new integer.
-    The cvta2 macro does no error checking.  Thus, you must write code to validate the input.    This is a major part of the assignment.   While implementation of this assignment in Java would be trivial, it is more difficult in assembler.   In particular, input validation will take some careful thought.
-    Your program must be enclosed in a loop that asks the user if s/he wants to factor another integer.  Acceptable responses to this prompt are YyNn.  Any other input will result in an error message and the user will then be prompted again until s/he enters a valid response.  The title line should be printed only one time, and thus will not be in the body of the loop.
-    Your program output should match the sample output given below, including the repetition of the number being factored in the answer line.  There should be no extraneous spaces in that line.
-    Your program will calculate the prime factors for the input integer and print the answer in the following format:
+Details:  
+Your program must print a title line, consisting of The assignment number, your name, and your class account, all on one line:
+Your program will accept as input only unsigned integers in the range 2 .. 65535.  If the user enters a value that is invalid, your program must print a helpful error message and prompt the user to enter a new integer.
+The cvta2 macro does no error checking.  Thus, you must write code to validate the input.    
+This is a major part of the assignment.   
+While implementation of this assignment in Java would be trivial, it is more difficult in assembler.   In particular, input validation will take some careful thought.  
+Your program must be enclosed in a loop that asks the user if s/he wants to factor another integer.  Acceptable responses to this prompt are YyNn. 
+Any other input will result in an error message and the user will then be prompted again until s/he enters a valid response.  The title line should be printed only one time, and thus will not be in the body of the loop.  
+Your program output should match the sample output given below, including the repetition of the number being factored in the answer line.  There should be no extraneous spaces in that line.  
+Your program will calculate the prime factors for the input integer and print the answer in the following format:
 
     The factors of XXXX are:
     Factor_1*Factor_2*Factor_3 ...
